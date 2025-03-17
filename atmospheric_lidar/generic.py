@@ -689,6 +689,7 @@ class LidarChannel(object):
             len(channel_parameters['data'])) * self.resolution + self.resolution / 2.0  # Change: add half bin in the z
         self.points = len(channel_parameters['data'])
         self.rc = []
+        self.duration = channel_parameters['duration']
 
     def get_duration(self):
         """ Get an array with the duration of each profile in seconds.
@@ -868,6 +869,7 @@ class LidarChannel(object):
         # Create a list with the values needed by channel's __init__()
         parameters_values = {'name': self.wavelength,
                              'binwidth': self.binwidth,
+                             'duration': self.get_duration().tolist(),
                              'data': subset_data[
                                  list(subset_data.keys())[0]], }  # We just need any array with the correct length
 
