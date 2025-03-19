@@ -685,8 +685,12 @@ class LidarChannel(object):
         self.binwidth = float(channel_parameters['binwidth'])  # in microseconds
         self.data = {}
         self.resolution = self.binwidth * c / 2
-        self.z = np.arange(
-            len(channel_parameters['data'])) * self.resolution + self.resolution / 2.0  # Change: add half bin in the z
+        z = channel_parameters.get('z', None)
+        if z is not None:
+            self.z = z   # Use provide z 
+        else:
+            self.z = np.arange(
+                len(channel_parameters['data'])) * self.resolution + self.resolution / 2.0  # Change: add half bin in the z
         self.points = len(channel_parameters['data'])
         self.rc = []
         self.duration = channel_parameters['duration']
@@ -870,6 +874,7 @@ class LidarChannel(object):
         parameters_values = {'name': self.wavelength,
                              'binwidth': self.binwidth,
                              'duration': self.get_duration().tolist(),
+                             'z': self.z[b_min:b_max],
                              'data': subset_data[
                                  list(subset_data.keys())[0]], }  # We just need any array with the correct length
 

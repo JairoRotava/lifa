@@ -1,5 +1,12 @@
 This is a fork from https://repositories.imaa.cnr.it/public/atmospheric_lidar/
-This is under development - user pip install atmospheric-lidar instead
+
+Use "pip install ." to use this package.
+
+or
+
+"pip install atmospheric-lidar"
+
+for original.
 
 Overview
 ========
