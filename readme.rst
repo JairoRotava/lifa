@@ -1,4 +1,10 @@
+Overview
+========
+
+Many many thanks for all the efforts of Ioannis Binietoglou, for the original package atmospheric-lidar
 This is a fork from https://repositories.imaa.cnr.it/public/atmospheric_lidar/
+
+There are many modifications to adapt the code to ours lab applications, so the package name has changed to LIFA (Lidar Inversion for FAMES Applications)
 
 Use "pip install ." to use this package.
 
@@ -7,9 +13,6 @@ or
 "pip install atmospheric-lidar"
 
 for original.
-
-Overview
-========
 
 This package provides utilities to handle raw (atmospheric) lidar input data.
 The main format supported are Licel binary files (including the Raymetrics modified format).
@@ -22,7 +25,15 @@ Installation
 
 The easiest way to install this module is from the python package index using ``pip``::
 
-   pip install atmospheric-lidar
+   pip install .
+
+How to use
+==========
+
+from lifa.licel import LicelLidarMeasurement
+import lifa
+
+
 
 Using it as a Licel to SCC converter
 ====================================

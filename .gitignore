@@ -4,7 +4,7 @@
 readme.md~
 *.orig
 .idea/*
-atmospheric_lidar\.egg-info/
+lifa.egg-info/
 *.nc
 build/*
 dist/*
