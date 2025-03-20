@@ -2,7 +2,7 @@
 
 import pytest
 import glob
-from atmospheric_lidar import licel
+from lifa import licel
 
 def test_func():
     assert 1 == 1

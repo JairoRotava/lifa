@@ -42,7 +42,7 @@ import glob
 import os
 import argparse
 
-from atmospheric_lidar import ipral
+from lifa import ipral
 
 
 if __name__ == "__main__":

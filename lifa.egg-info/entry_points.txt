@@ -1,0 +1,4 @@
+[console_scripts]
+licel2scc = lifa.scripts.licel2scc:main
+licel2scc-depol = lifa.scripts.licel2scc_depol:main
+licel2tc = lifa.scripts.licel2tc:main

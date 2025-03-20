@@ -30,14 +30,14 @@ def find_version(*file_paths):
 
 
 # Run setup
-setup(name='atmospheric_lidar',
-      packages=['atmospheric_lidar', 'atmospheric_lidar.scripts', 'atmospheric_lidar.systems'],
-      version=find_version("atmospheric_lidar", "__init__.py"),
+setup(name='lifa',
+      packages=['lifa', 'lifa.scripts', 'lifa.systems'],
+      version=find_version("lifa", "__init__.py"),
       description='Package for reading raw atmospheric lidar data.',
       long_description=long_description,
       url='https://bitbucket.org/iannis_b/atmospheric-lidar/',
-      author='Ioannis Binietoglou',
-      author_email='ioannis@inoe.ro',
+      author='',
+      author_email='',
       license='MIT',
       classifiers=[
           'Development Status :: 3 - Alpha',
@@ -58,8 +58,8 @@ setup(name='atmospheric_lidar',
           "pyyaml",
       ],
       entry_points={
-          'console_scripts': ['licel2scc = atmospheric_lidar.scripts.licel2scc:main',
-                              'licel2scc-depol = atmospheric_lidar.scripts.licel2scc_depol:main',
-                              'licel2tc = atmospheric_lidar.scripts.licel2tc:main'],
+          'console_scripts': ['licel2scc = lifa.scripts.licel2scc:main',
+                              'licel2scc-depol = lifa.scripts.licel2scc_depol:main',
+                              'licel2tc = lifa.scripts.licel2tc:main'],
       },
       )
