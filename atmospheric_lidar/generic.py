@@ -958,7 +958,7 @@ class LidarChannel(object):
         return profile
 
     def plot(self, figsize=(8, 4), signal_type='rc', zoom=[0, 12000, 0, None], show_plot=True,
-             cmap=plt.cm.jet, z0=None, title=None, vmin=0, vmax=1.3 * 10 ** 7):
+             cmap=plt.cm.jet, z0=None, title=None, vmin=None, vmax=None):
         """
         Plot of the channel data.
         
@@ -979,9 +979,9 @@ class LidarChannel(object):
         title : str
            Optional title for the plot.
         vmin : float
-           Minimum value for the color scale.
+           Minimum value for the color scale. None for auto.
         vmax : float
-           Maximum value for the color scale.
+           Maximum value for the color scale. None for auto.
         """
         fig = plt.figure(figsize=figsize)
         ax1 = fig.add_subplot(111)
@@ -999,7 +999,7 @@ class LidarChannel(object):
     def draw_plot(self, ax1, cmap=plt.cm.jet, signal_type='rc',
                   zoom=[0, 12000, 0, None], z0=None,
                   add_colorbar=True, cmap_label='a.u.', cb_format=None,
-                  vmin=0, vmax=1.3 * 10 ** 7):
+                  vmin=None, vmax=None):
         """
         Draw channel data on the given axis.
         
@@ -1022,9 +1022,9 @@ class LidarChannel(object):
         cb_format : str
            Colorbar tick format string.
         vmin : float
-           Minimum value for the color scale.
+           Minimum value for the color scale. None for auto.
         vmax : float
-           Maximum value for the color scale.
+           Maximum value for the color scale. None for auto.
         """
         if signal_type == 'rc':
             if len(self.rc) == 0:
@@ -1059,6 +1059,14 @@ class LidarChannel(object):
 
         ts1 = mpl.dates.date2num(self.start_time)
         ts2 = mpl.dates.date2num(self.stop_time)
+
+        # Auto range if not defined
+        if vmax is None:
+            vmax = data.max() / 0.9
+        # Auto range if not defined
+        if vmin is None:
+            vmin = data.max() * 0.1
+
 
         im1 = ax1.imshow(data.transpose()[zoom[0]:hmax_idx, zoom[2]:zoom[3]],
                          aspect='auto',
