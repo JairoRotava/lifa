@@ -633,9 +633,9 @@ class BaseLidarMeasurement(object):
         """
         pass
 
-    def plot(self):
+    def plot(self, *args, **kwargs ):
         for channel in self.channels:
-            self.channels[channel].plot(show_plot=False)
+            self.channels[channel].plot(show_plot=False, *args, **kwargs)
         plt.show()
 
     def get_dark_measurements(self):
