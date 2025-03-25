@@ -4,9 +4,10 @@
 readme.md~
 *.orig
 .idea/*
-lifa.egg-info/
+lifa.egg-info/*
 *.nc
 build/*
 dist/*
 docs/_build/html/*
 docs/_build/doctrees/*
+
