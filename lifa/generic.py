@@ -736,8 +736,10 @@ class LidarChannel(object):
         """
         background = np.mean(self.matrix[:, idx_min:idx_max], axis=1)
         background_corrected = (self.matrix.transpose() - background).transpose()
-        background_corrected = np.roll(background_corrected, -first_signal_bin, axis=1)
-        background_corrected[:, -first_signal_bin:] = 0
+        if first_signal_bin != 0:   # if not zero adjust
+            background_corrected = np.roll(background_corrected, -first_signal_bin, axis=1)
+            background_corrected[:, -first_signal_bin:] = 0
+        # TODO: possible bug if first_signal_bin is not zero
         self.rc = background_corrected * (self.z ** 2)
 
     def noise_mask(self, idx_min=-2000, idx_max=-500, threshold=1.):

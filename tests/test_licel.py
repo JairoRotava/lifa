@@ -14,6 +14,13 @@ def test_subset_by_bin():
     subset = subset_channels.subset_by_bins(10, 20)
     assert 1 == 1
 
+def test_calculate_rc():
+    files = glob.glob('./tests/tests_data/measurement_1/*')
+    measurements = licel.LicelLidarMeasurement(files)
+    channel = measurements.channels['00355.o_an']
+    channel.calculate_rc()
+    assert 1 == 1
+
 if __name__ == "__main__":
     pytest.main()
 
