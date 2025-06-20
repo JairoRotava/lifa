@@ -15,6 +15,19 @@ import json
 import argparse
 import glob
 import json
+import fames.process
+
+
+def process_emissions(filename, fdestination):
+
+    #TODO: checar se arquivo é válido - tipo licel.
+    lidar_data = licelv2.LicelFileV2(filename)
+    flare_emissions = fames.process.emissions(files=[filename], calib = fames.process.calibrations)
+
+
+    # Salva como JSON
+    with open(fdestination, 'w', encoding='utf-8') as f:
+        json.dump(flare_emissions, f, ensure_ascii=False, indent=4, default=str)
 
 
 def process_licel(filename, fdestination, ce_cal=1, co2_cal=1, ch4_cal=1, n2_cal=1 ):
@@ -67,7 +80,6 @@ def process_licel(filename, fdestination, ce_cal=1, co2_cal=1, ch4_cal=1, n2_cal
     nco2 = co2_cal * np.sum(rm_co2)
     nch4 = ch4_cal * np.sum(rm_ch4)
 
-    import json
 
     data = {
         'source': lidar_data.file_name,
@@ -107,18 +119,18 @@ def read_processed(sources):
     for source in sources:
         with open(source) as f:
             d = json.load(f)
-            row_list.append({'file_name': f.name, 
-                             'start_time': d['start_time'],
-                             'stop_time': d['stop_time'],
-                             'ce' : d['ce'],
-                             'nch4' : d['nch4'],
-                             'nco2' : d['nco2'],
-                             'laser_shot': d['laser_shots'],
-                             'ch4_signal': d['ch4_signal'],
-                             'co2_signal': d['co2_signal'],
-                             'n2_signal': d['n2_signal'],
-                             'distance': d['distance']
-            })
+            print(d['emissions'])
+            row_list.append(d['emissions']
+            #row_list.append({'file_name': f.name, 
+            #                 'start_time': d['start_time'],
+            #                 'stop_time': d['stop_time'],
+            #                 'ce' : d['ce'],
+            #                 'ch4' : d['ch4'],
+            #                 'co2' : d['co2'],
+            #                 'fluo' : d['fluo'],
+            #                 'signals' : d['signals'],
+            #                 'distance': d['distance']
+            )
                                                                       
     df = pd.DataFrame(row_list)
     df['start_time'] = pd.to_datetime(df['start_time'])

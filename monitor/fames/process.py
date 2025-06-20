@@ -196,10 +196,24 @@ def emissions(files, calib):
             'ch4': flare_ch4,
             'ce': flare_ce,
             'ce_rel': flare_ce_rel,
-            'fluo': flare_fluo
+            'fluo': flare_fluo,
+        },
+        'emissions' : {
+            'file_name': files, 
+            'start_time': start_time,
+            'stop_time': stop_time,
+            'ce' : flare_ce,
+            'ch4' : flare_ch4,
+            'co2' : flare_co2,
+            'fluo' : flare_fluo,
+            'signals' : signal,
+            'distance': 1
         }
     }
 
     return output
+
+
+
 
 #flare_emissions = emissions(files=files[:], calib = calibrations)

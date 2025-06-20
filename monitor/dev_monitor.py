@@ -52,7 +52,7 @@ class App(tk.Tk):
         self.monitor_dir = None
         self.temp_dir = os.path.join(file_dir, 'temp')
         #self.temp_dir = tempfile.mkdtemp()
-        print("Utilizando diretorio temporario: " + self.temp_dir)
+        print("Temprory folder:: " + self.temp_dir)
         self.dados = None
         self.files = []
         self.processed_files = []
@@ -188,7 +188,8 @@ class App(tk.Tk):
                     print(file, processed_file)
                     #fames.files.process_licel(file, processed_file)
                     try:
-                        fames.files.process_licel(file, processed_file)
+                        #fames.files.process_licel(file, processed_file)
+                        fames.files.process_emissions(file, processed_file)
                     except:
                         print("Error processing {}".format(file))
                     else:

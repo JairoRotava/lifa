@@ -309,11 +309,15 @@ def plot_signal(axes, df, measurement_id = 0):
 
     # Faz relatorio da aquisiçção
 
-    ch4 = df.iloc[measurement_id]['ch4_signal']
-    co2 = df.iloc[measurement_id]['co2_signal']
-    n2 = df.iloc[measurement_id]['n2_signal']
-    dist = df.iloc[measurement_id]['distance']
+    #ch4 = df.iloc[measurement_id]['ch4_signal']
+    #co2 = df.iloc[measurement_id]['co2_signal']
+    #n2 = df.iloc[measurement_id]['n2_signal']
+    #dist = df.iloc[measurement_id]['distance']
 
+    ch4 = [0, 1]
+    co2 = [0, 1]
+    n2 = [0, 1]
+    dist = [0, 1]
 
        
     #host.set_xlim(0, None)
@@ -353,7 +357,7 @@ def plot_histogram(ax, df):
     
     ax.cla()
     ce = ce = df['ce']
-    n_bins = np.arange(-0.1, 1.1, 0.01)
+    n_bins = np.arange(0.5, 1.1, 0.01)
     # We can set the number of bins with the *bins* keyword argument.
     ax.hist(ce, bins=n_bins, rwidth=0.9)
     ax.set_xlabel("CE")
@@ -363,15 +367,17 @@ def plot_histogram(ax, df):
 
 def plot_history(axes, df, highlight = None):
 
-    nch4 = df['nch4']
-    nco2 = df['nco2']
+    ch4 = df['ch4']
+    co2 = df['co2']
     ce = df['ce']
+    fluo = df['fluo']
 
     time = df['start_time']
 
     ax1 = axes[0]
-    ax2 = axes[1]
-    ax3 = axes[2]
+    ax2 = ax1.twinx()
+    ax3 = ax1.twinx()
+    ax4 = ax2.twinx()
 
     ax1.cla()
     ax2.cla()
@@ -381,10 +387,11 @@ def plot_history(axes, df, highlight = None):
 
         
     #host.set_xlim(0, None)
-    ax1.set_ylim(0, None)
-    ax2.set_ylim(0, None)
-    ax3.set_ylim(0, None)
-        
+    ax1.set_ylim(0, max(ch4)/0.8)
+    ax2.set_ylim(0, max(co2)/0.8)
+    ax3.set_ylim(0.5, 1/0.8)
+    
+
     #host.set_xlabel("BIN")
     ax1.set_xlabel("datetime")
     ax1.set_ylabel("CH4 (ppm)")
@@ -393,12 +400,12 @@ def plot_history(axes, df, highlight = None):
 
     color1, color2, color3 = plt.cm.viridis([0, .5, .9])
 
-    p1 = ax1.plot(time, nch4, color=color1, label="CH4", marker='o', linestyle=':')
-    p2 = ax2.plot(time, nco2, color=color2, label="CO2", marker='o', linestyle=':')
+    p1 = ax1.plot(time, ch4, color=color1, label="CH4", marker='o', linestyle=':')
+    p2 = ax2.plot(time, co2, color=color2, label="CO2", marker='o', linestyle=':')
     p3 = ax3.plot(time, ce, color=color3, label="CE", marker='o', linestyle=':')
     ax1.set_title("Emissions")
 
-    ax1.legend(handles=p1+p2+p3, loc='best')
+    ax1.legend(handles=p1+p2+p3, loc='upper right')
 
     # right, left, top, bottom
     ax3.spines['right'].set_position(('outward', 60))
@@ -411,8 +418,8 @@ def plot_history(axes, df, highlight = None):
     #highlight
     #ax1.axvspan(time[3], time[4], color='red', alpha=0.5)
     if highlight is not None:
-        ax1.plot(time[highlight], nch4[highlight], 'r*')
-        ax2.plot(time[highlight], nco2[highlight], 'r*')
+        ax1.plot(time[highlight], ch4[highlight], 'r*')
+        ax2.plot(time[highlight], co2[highlight], 'r*')
         ax3.plot(time[highlight], ce[highlight], 'r*')
 
 
@@ -421,7 +428,7 @@ def create_simple_dashboard(fig):
     figT, figB = fig.subfigures(2, 1)
     fig_history, fig_histogram = figT.subfigures(1 ,2, width_ratios=[2, 1])
     ax = fig_history.subplots(1,1)
-    history_axes = [ax, ax.twinx(), ax.twinx()]
+    history_axes = [ax, ax.twinx(), ax.twinx() ]
     histogram_axes = fig_histogram.subplots(1,1)
 
     fig_signal, fig_info = figB.subfigures(1, 2, width_ratios=[2, 1])
@@ -442,16 +449,15 @@ def update_simple_dashboard( dashboard, df, meas=-1):
    
    row = df.iloc[meas]
    id = df.index.get_loc(row.name)
-   info = ('Total measurements: {}\nShowing measurement: {}\nFile: {}\nStart time: {}\nStop time {}\nLaser shots: {}\nCE: {}\nCH4/N2: {}\nCO2/N2: {}'.format(
+   info = ('Total measurements: {}\nShowing measurement: {}\nFile: {}\nStart time: {}\nStop time {}\nCE: {}\nCH4: {}\nCO2: {}'.format(
       len(df.index),
       id + 1,
-      os.path.basename(row['file_name']),
+      os.path.basename(row['file_name'][0]),
       row['start_time'],
       row['stop_time'],
-      row['laser_shot'],
       row['ce'],
-      row['nch4'],
-      row['nco2']
+      row['ch4'],
+      row['co2']
       ))
    fig_info.clear()
    fig_info.text(0,0.9,info, verticalalignment='top')
