@@ -30,7 +30,7 @@ def signal(df, measurement_id = 0):
 
 
 
-    # Apresenta sinal LIdar
+    # Apresenta sinal Lidar
     # Create figure and subplot manually
     # fig = plt.figure()
     # host = fig.add_subplot(111)
@@ -42,6 +42,7 @@ def signal(df, measurement_id = 0):
     fig, axes = plt.subplots(1, 1, figsize=(8,5), layout='constrained') # (width, height) in inches
 
     host = axes
+    ax1 = host
 
 
     #plt.savefig(os.path.join(data_directory,'report.pdf'), bbox_inches='tight')
@@ -49,33 +50,33 @@ def signal(df, measurement_id = 0):
     # (see https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.subplots.html and
     # .. https://matplotlib.org/stable/tutorials/intermediate/constrainedlayout_guide.html)
         
-    ax2 = host.twinx()
-    ax3 = host.twinx()
+    #ax2 = host.twinx()
+    #ax3 = host.twinx()
 
 
         
     #host.set_xlim(0, None)
     host.set_ylim(-0.01, 0.3)
-    ax2.set_ylim(-0.01, 0.3)
-    ax3.set_ylim(0, 30)
+    #ax2.set_ylim(-0.01, 0.3)
+    #ax3.set_ylim(0, 30)
         
     #host.set_xlabel("BIN")
     host.set_xlabel("distance (m)")
-    host.set_ylabel("CH4")
-    ax2.set_ylabel("CO2")
-    ax3.set_ylabel("N2")
+    host.set_ylabel("CH4 (ppm)")
+    #ax2.set_ylabel("CO2 (ppm)")
+    #ax3.set_ylabel("REF (a.u.)")
 
     color1, color2, color3 = plt.cm.viridis([0, .5, .9])
 
     p1 = host.plot(dist, ch4, color=color1, label="CH4", marker='o', linestyle=':')
-    p2 = ax2.plot(dist, co2, color=color2, label="CO2", marker='o', linestyle=':')
-    p3 = ax3.plot(dist, n2, color=color3, label="N2", marker='o', linestyle=':')
-    plt.title("lidar signal corrected")
+    p2 = ax1.plot(dist, co2, color=color2, label="CO2", marker='o', linestyle=':')
+    p3 = ax1.plot(dist, n2, color=color3, label="REF (a.u.)", marker='o', linestyle=':')
+    plt.title("lidar signals")
 
     host.legend(handles=p1+p2+p3, loc='best')
 
     # right, left, top, bottom
-    ax3.spines['right'].set_position(('outward', 60))
+    #ax3.spines['right'].set_position(('outward', 60))
 
     # no x-ticks                 
     #host.xaxis.set_ticks([])
@@ -96,8 +97,8 @@ def signal(df, measurement_id = 0):
     # ax3.yaxis.set_ticks_position('left')
 
     host.yaxis.label.set_color(p1[0].get_color())
-    ax2.yaxis.label.set_color(p2[0].get_color())
-    ax3.yaxis.label.set_color(p3[0].get_color())
+    #ax2.yaxis.label.set_color(p2[0].get_color())
+    #ax3.yaxis.label.set_color(p3[0].get_color())
 
     #plt.show()
 
@@ -176,22 +177,22 @@ def generate(df, measurement_id = -1):
     ax3 = host.twinx()
         
     #host.set_xlim(0, None)
-    host.set_ylim(0, 0.1)
-    ax2.set_ylim(0, 0.1)
-    ax3.set_ylim(0, 1)
+    #host.set_ylim(0, 0.1)
+    #ax2.set_ylim(0, 0.1)
+    #ax3.set_ylim(0, 1)
         
     #host.set_xlabel("BIN")
     host.set_xlabel("datetime")
-    host.set_ylabel("NCH4")
-    ax2.set_ylabel("NCO2")
-    ax3.set_ylabel("CE")
+    host.set_ylabel("CH4 (ppm)")
+    ax2.set_ylabel("CO2 (ppm)")
+    ax3.set_ylabel("CE (%)")
 
     color1, color2, color3 = plt.cm.viridis([0, .5, .9])
 
-    p1 = host.plot(time, nch4, color=color1, label="NCH4", marker='o', linestyle=':')
-    p2 = ax2.plot(time, nco2, color=color2, label="NCO2", marker='o', linestyle=':')
+    p1 = host.plot(time, nch4, color=color1, label="CH4", marker='o', linestyle=':')
+    p2 = ax2.plot(time, nco2, color=color2, label="CO2", marker='o', linestyle=':')
     p3 = ax3.plot(time, ce, color=color3, label="CE", marker='o', linestyle=':')
-    host.set_title("history")
+    host.set_title("History")
 
     host.legend(handles=p1+p2+p3, loc='best')
 
@@ -297,14 +298,14 @@ def plot_signal(axes, df, measurement_id = 0):
     #print(axes)
 
     ax1 = axes[0]
-    ax2 = axes[1]
-    ax3 = axes[2]
+    #ax2 = axes[1]
+    #ax3 = axes[2]
 
     ax1.cla()
-    ax2.cla()
-    ax2.yaxis.set_label_position('right')
-    ax3.cla()
-    ax3.yaxis.set_label_position('right')
+    #ax2.cla()
+    #ax2.yaxis.set_label_position('right')
+    #ax3.cla()
+    #ax3.yaxis.set_label_position('right')
 
     # Faz relatorio da aquisiçção
 
@@ -316,31 +317,37 @@ def plot_signal(axes, df, measurement_id = 0):
 
        
     #host.set_xlim(0, None)
-    ax1.set_ylim(-0.01, 0.3)
-    ax2.set_ylim(-0.01, 0.3)
-    ax3.set_ylim(0, 30)
+    #ax1.set_ylim(-0.01, 0.3)
+    #ax2.set_ylim(-0.01, 0.3)
+    #ax3.set_ylim(0, 30)
         
+    #ax1.set_ylim(0, None)
+
     #host.set_xlabel("BIN")
     ax1.set_xlabel("distance (m)")
-    ax1.set_ylabel("CH4")
-    ax2.set_ylabel("CO2")
-    ax3.set_ylabel("N2")
+    #ax1.set_ylabel("CH4 (ppm)")
+    #ax2.set_ylabel("CO2 (ppm)")
+    #ax3.set_ylabel("REF")
+
+    ax1.set_ylabel("(mV)")
 
     color1, color2, color3 = plt.cm.viridis([0, .5, .9])
 
-    p1 = ax1.plot(dist, ch4, color=color1, label="CH4", marker='o', linestyle=':')
-    p2 = ax2.plot(dist, co2, color=color2, label="CO2", marker='o', linestyle=':')
-    p3 = ax3.plot(dist, n2, color=color3, label="N2", marker='o', linestyle=':')
-    ax1.set_title("Signal")
+    ax1.set_yscale('log')
 
-    ax1.legend(handles=p1+p2+p3, loc='best')
+    p1 = ax1.plot(dist, ch4, color=color1, label="CH4", marker='o', linestyle=':')
+    p2 = ax1.plot(dist, co2, color=color2, label="CO2", marker='o', linestyle=':')
+    p3 = ax1.plot(dist, n2, color=color3, label="REF", marker='o', linestyle=':')
+    ax1.set_title("Signals")
+
+    ax1.legend(handles=p1+p2+p3, loc='upper right')
 
     # right, left, top, bottom
-    ax3.spines['right'].set_position(('outward', 60))
+    #ax3.spines['right'].set_position(('outward', 60))
 
     ax1.yaxis.label.set_color(p1[0].get_color())
-    ax2.yaxis.label.set_color(p2[0].get_color())
-    ax3.yaxis.label.set_color(p3[0].get_color())
+    #ax2.yaxis.label.set_color(p2[0].get_color())
+    #ax3.yaxis.label.set_color(p3[0].get_color())
 
 def plot_histogram(ax, df):
     
@@ -374,22 +381,22 @@ def plot_history(axes, df, highlight = None):
 
         
     #host.set_xlim(0, None)
-    ax1.set_ylim(0, 0.1)
-    ax2.set_ylim(0, 0.1)
-    ax3.set_ylim(0, 1)
+    ax1.set_ylim(0, None)
+    ax2.set_ylim(0, None)
+    ax3.set_ylim(0, None)
         
     #host.set_xlabel("BIN")
     ax1.set_xlabel("datetime")
-    ax1.set_ylabel("CH4/N2")
-    ax2.set_ylabel("CO2/N2")
-    ax3.set_ylabel("CE")
+    ax1.set_ylabel("CH4 (ppm)")
+    ax2.set_ylabel("CO2 (ppm)")
+    ax3.set_ylabel("CE (%)")
 
     color1, color2, color3 = plt.cm.viridis([0, .5, .9])
 
-    p1 = ax1.plot(time, nch4, color=color1, label="CH4/N2", marker='o', linestyle=':')
-    p2 = ax2.plot(time, nco2, color=color2, label="CO2/N2", marker='o', linestyle=':')
+    p1 = ax1.plot(time, nch4, color=color1, label="CH4", marker='o', linestyle=':')
+    p2 = ax2.plot(time, nco2, color=color2, label="CO2", marker='o', linestyle=':')
     p3 = ax3.plot(time, ce, color=color3, label="CE", marker='o', linestyle=':')
-    ax1.set_title("History")
+    ax1.set_title("Emissions")
 
     ax1.legend(handles=p1+p2+p3, loc='best')
 
@@ -419,7 +426,7 @@ def create_simple_dashboard(fig):
 
     fig_signal, fig_info = figB.subfigures(1, 2, width_ratios=[2, 1])
     ax = fig_signal.subplots(1,1)
-    axes_signal = [ax, ax.twinx(), ax.twinx()]
+    axes_signal = [ax]
 
     return [fig, history_axes, histogram_axes, axes_signal, fig_info]
 

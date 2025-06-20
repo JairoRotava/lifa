@@ -2,7 +2,7 @@
 
 import tkinter as tk
 from tkinter import ttk
-import ttkthemes
+#import ttkthemes
 
 from matplotlib.backends.backend_tkagg import (
     FigureCanvasTkAgg, NavigationToolbar2Tk)
