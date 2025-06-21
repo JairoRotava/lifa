@@ -52,7 +52,7 @@ class App(tk.Tk):
         self.monitor_dir = None
         self.temp_dir = os.path.join(file_dir, 'temp')
         #self.temp_dir = tempfile.mkdtemp()
-        print("Temprory folder:: " + self.temp_dir)
+        print("Temporary folder:: " + self.temp_dir)
         self.dados = None
         self.files = []
         self.processed_files = []

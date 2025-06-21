@@ -314,10 +314,10 @@ def plot_signal(axes, df, measurement_id = 0):
     #n2 = df.iloc[measurement_id]['n2_signal']
     #dist = df.iloc[measurement_id]['distance']
 
-    ch4 = [0, 1]
-    co2 = [0, 1]
-    n2 = [0, 1]
-    dist = [0, 1]
+    #ch4 = [0, 1]
+    #co2 = [0, 1]
+    #n2 = [0, 1]
+    #dist = [0, 1]
 
        
     #host.set_xlim(0, None)
@@ -339,12 +339,22 @@ def plot_signal(axes, df, measurement_id = 0):
 
     ax1.set_yscale('log')
 
-    p1 = ax1.plot(dist, ch4, color=color1, label="CH4", marker='o', linestyle=':')
-    p2 = ax1.plot(dist, co2, color=color2, label="CO2", marker='o', linestyle=':')
-    p3 = ax1.plot(dist, n2, color=color3, label="REF", marker='o', linestyle=':')
+    distances = df['distances'][measurement_id]
+    signals = df['signals'][measurement_id]
+    channels_names = df['channels'][measurement_id]
+
+    #print('xx')
+    #print(type(distances)) 
+    #print(channels_names)
+
+    p1 = ax1.plot(distances, np.transpose(signals), label = channels_names)
+    #p2 = ax1.plot(dist, co2, color=color2, label="CO2", marker='o', linestyle=':')
+    #p3 = ax1.plot(dist, n2, color=color3, label="REF", marker='o', linestyle=':')
     ax1.set_title("Signals")
 
-    ax1.legend(handles=p1+p2+p3, loc='upper right')
+    ax1.legend(p1, channels_names,  loc='upper right')
+    #ax1.legend(handles=p1, loc='upper right')
+
 
     # right, left, top, bottom
     #ax3.spines['right'].set_position(('outward', 60))
@@ -375,10 +385,9 @@ def plot_history(axes, df, highlight = None):
     time = df['start_time']
 
     ax1 = axes[0]
-    ax2 = ax1.twinx()
-    ax3 = ax1.twinx()
-    ax4 = ax2.twinx()
-
+    ax2 = axes[1]
+    ax3 = axes[2]
+    
     ax1.cla()
     ax2.cla()
     ax2.yaxis.set_label_position('right')
@@ -449,7 +458,7 @@ def update_simple_dashboard( dashboard, df, meas=-1):
    
    row = df.iloc[meas]
    id = df.index.get_loc(row.name)
-   info = ('Total measurements: {}\nShowing measurement: {}\nFile: {}\nStart time: {}\nStop time {}\nCE: {}\nCH4: {}\nCO2: {}'.format(
+   info = ('Total measurements: {}\nShowing measurement: {}\nFile: {}\nStart time: {}\nStop time {}\nCE: {}\nCH4: {}\nCO2: {}\nFluo: {}'.format(
       len(df.index),
       id + 1,
       os.path.basename(row['file_name'][0]),
@@ -457,7 +466,8 @@ def update_simple_dashboard( dashboard, df, meas=-1):
       row['stop_time'],
       row['ce'],
       row['ch4'],
-      row['co2']
+      row['co2'],
+      row['fluo']
       ))
    fig_info.clear()
    fig_info.text(0,0.9,info, verticalalignment='top')

@@ -206,9 +206,10 @@ def emissions(files, calib):
             'ch4' : flare_ch4,
             'co2' : flare_co2,
             'fluo' : flare_fluo,
-            'signals' : signal,
-            'distance': 1
-        }
+            'signals' : signal_subset.tolist(),
+            'distances': distance_subset.tolist(),
+            'channels' : licel_channels_names
+        },
     }
 
     return output

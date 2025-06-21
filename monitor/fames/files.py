@@ -119,7 +119,6 @@ def read_processed(sources):
     for source in sources:
         with open(source) as f:
             d = json.load(f)
-            print(d['emissions'])
             row_list.append(d['emissions']
             #row_list.append({'file_name': f.name, 
             #                 'start_time': d['start_time'],
