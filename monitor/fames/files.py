@@ -18,11 +18,13 @@ import json
 import fames.process
 
 
-def process_emissions(filename, fdestination):
+def process_emissions(filename, fdestination, calibration):
 
     #TODO: checar se arquivo é válido - tipo licel.
     lidar_data = licelv2.LicelFileV2(filename)
-    flare_emissions = fames.process.emissions(files=[filename], calib = fames.process.calibrations)
+
+    # carrega 
+    flare_emissions = fames.process.emissions(files=[filename], calib = calibration)
 
 
     # Salva como JSON

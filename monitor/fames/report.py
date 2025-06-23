@@ -328,18 +328,22 @@ def plot_signal(axes, df, measurement_id = 0):
     #ax1.set_ylim(0, None)
 
     #host.set_xlabel("BIN")
-    ax1.set_xlabel("distance (m)")
+    ax1.set_xlabel("bin")
     #ax1.set_ylabel("CH4 (ppm)")
     #ax2.set_ylabel("CO2 (ppm)")
     #ax3.set_ylabel("REF")
 
     ax1.set_ylabel("(mV)")
 
+    ax1.minorticks_on()
+    ax1.grid(which='both')
+    
+
     color1, color2, color3 = plt.cm.viridis([0, .5, .9])
 
     ax1.set_yscale('log')
 
-    distances = df['distances'][measurement_id]
+    distances = df['bins'][measurement_id]
     signals = df['signals'][measurement_id]
     channels_names = df['channels'][measurement_id]
 
@@ -458,16 +462,16 @@ def update_simple_dashboard( dashboard, df, meas=-1):
    
    row = df.iloc[meas]
    id = df.index.get_loc(row.name)
-   info = ('Total measurements: {}\nShowing measurement: {}\nFile: {}\nStart time: {}\nStop time {}\nCE: {}\nCH4: {}\nCO2: {}\nFluo: {}'.format(
+   info = ('Total measurements: {}\nShowing measurement: {}\nFile: {}\nStart time: {}\nStop time {:.2f}\nCE: {:.2f}%\nCH4: {:.2f} ppm\nCO2: {:.2f} ppm\nFluo: {:.2f}%'.format(
       len(df.index),
       id + 1,
       os.path.basename(row['file_name'][0]),
       row['start_time'],
       row['stop_time'],
-      row['ce'],
+      row['ce']*100,
       row['ch4'],
       row['co2'],
-      row['fluo']
+      row['fluo']*100
       ))
    fig_info.clear()
    fig_info.text(0,0.9,info, verticalalignment='top')

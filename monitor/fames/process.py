@@ -82,6 +82,7 @@ def emissions(files, calib):
     subset_max = post_flare_bins[1]
     signal_subset = signal[:,subset_min:subset_max]
     distance_subset = distance[subset_min:subset_max]
+    bins_subset = np.arange(subset_min, subset_max)
 
     # Calcula sinal de referencia
     # Avaliação de crosstalk entre 355 e 352. Ver que exite influencia. O mesmo não ocorre em 532 e 530 nm.
@@ -208,6 +209,7 @@ def emissions(files, calib):
             'fluo' : flare_fluo,
             'signals' : signal_subset.tolist(),
             'distances': distance_subset.tolist(),
+            'bins': bins_subset.tolist(),
             'channels' : licel_channels_names
         },
     }

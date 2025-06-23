@@ -12,3 +12,5 @@ docs/_build/html/*
 docs/_build/doctrees/*
 monitor/temp/*
 *.fames
+monitor/build/*
+monitor/dist/*

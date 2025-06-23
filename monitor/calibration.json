@@ -1,0 +1,28 @@
+{
+    "crosstalk_355_ref": 150,
+    "g_co2": 3000000.0,
+    "crosstalk_fluo_co2": 0,
+    "g_ch4": 500000.0,
+    "crosstalk_fluo_ch4": 0,
+    "g_sp_ch4": 0,
+    "g_ce_relative": 0.16,
+    "pre_flare_bins": [
+        80,
+        100
+    ],
+    "post_flare_bins": [
+        120,
+        140
+    ],
+    "flare_bins": [
+        104,
+        109
+    ],
+    "background_bins": [
+        15000,
+        16000
+    ],
+    "correction_factor_co2": 1,
+    "correction_factor_ch4": 1,
+    "correction_factor_fluo": 1
+}

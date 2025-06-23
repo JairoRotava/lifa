@@ -1,4 +1,7 @@
 # Monitor de arquivos Licel para apresentacao de dados
+# Para compilar usar:  pyinstaller.exe -F .\dev_monitor.py     
+# Executavel está na past ./dist
+# Copiar arquivo calibration.json
 
 import tkinter as tk
 from tkinter import ttk
@@ -17,6 +20,7 @@ import fames
 import fames.files
 import fames.report
 import tempfile
+import json
 
 class App(tk.Tk):
     def __init__(self):
@@ -34,12 +38,13 @@ class App(tk.Tk):
 
         # Find the directory we executed the script from:
         execution_dir = os.getcwd()
+        
         # Find the directory in which the current script resides:
         file_dir = os.path.dirname(os.path.realpath(__file__))
 
         # Load  theme
-        self.tk.call('lappend', 'auto_path', os.path.join(file_dir, 'awthemes-10.4.0'))
-        self.tk.call('package', 'require', 'awlight')
+        #self.tk.call('lappend', 'auto_path', os.path.join(file_dir, 'awthemes-10.4.0'))
+        #self.tk.call('package', 'require', 'awlight')
 
         #s = ttk.Style()
         #print(s.theme_names())
@@ -50,9 +55,23 @@ class App(tk.Tk):
         self.status_bar = tk.StringVar()
         self.status_bar.set("Monitoring folder not selected")
         self.monitor_dir = None
-        self.temp_dir = os.path.join(file_dir, 'temp')
+        self.temp_dir = os.path.join(execution_dir, 'temp')
+        # Cria diretorio temp se ele não existe
+        if not os.path.isdir(self.temp_dir):
+            print("Creating temporary folder")
+            os.makedirs(self.temp_dir)
+
         #self.temp_dir = tempfile.mkdtemp()
         print("Temporary folder:: " + self.temp_dir)
+
+        #Carrega calibracao
+        self.calibration_file = os.path.join(execution_dir, 'calibration.json')
+        print("Calibration file: " + self.calibration_file)
+        with open(self.calibration_file) as f:
+            self.calibration = json.load(f)
+        print(self.calibration)
+
+
         self.dados = None
         self.files = []
         self.processed_files = []
@@ -177,7 +196,7 @@ class App(tk.Tk):
 
     def find_new_files(self):
         # Procura por novos aquivos
-        print("Checking for new files in {}".format(self.monitor_dir))
+        #print("Checking for new files in {}".format(self.monitor_dir))
         files = glob.glob(os.path.join(self.monitor_dir,'a???????.??????'))
         new_file = False
         for file in files:
@@ -185,11 +204,11 @@ class App(tk.Tk):
                 if file not in self.files:
                     processed_file = os.path.join(self.temp_dir,os.path.basename(file) + '.fames')
                     self.files.append(file)
-                    print(file, processed_file)
+                    print("New file found: ",file, " -> ", processed_file)
                     #fames.files.process_licel(file, processed_file)
                     try:
                         #fames.files.process_licel(file, processed_file)
-                        fames.files.process_emissions(file, processed_file)
+                        fames.files.process_emissions(file, processed_file, self.calibration)
                     except:
                         print("Error processing {}".format(file))
                     else:
