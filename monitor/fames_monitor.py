@@ -6,6 +6,7 @@
 import tkinter as tk
 from tkinter import ttk
 #import ttkthemes
+from PIL import ImageTk, Image
 
 from matplotlib.backends.backend_tkagg import (
     FigureCanvasTkAgg, NavigationToolbar2Tk)
@@ -101,12 +102,23 @@ class App(tk.Tk):
         self.scale = tk.Scale(content, orient=tk.HORIZONTAL, from_=1, to_=1, command=self.scale_event, tickinterval=1, length=300, variable=self.scale_pos)
         self.scale.grid(column=1, row=1, sticky=(tk.W))
         self.scale.config(state='disabled')
+
+        # Imagem do logo.
+        logo = tk.PhotoImage(file="logo.png")
+        # ajsuta tamanho da imagem para aproximadamente 50 px
+        logo = logo.subsample(int(logo.height()/75))
+        self.logo = ttk.Label(content, image=logo)
+        self.logo.image = logo
+
+        #self.logo.ima
+        self.logo.grid(column=3, row=1,sticky=(tk.E))
         #self.scale_label = ttk.Label(content, textvariable=slider)
         #self.scale_label.grid(column=2, row=1)
         self.label = ttk.Label(content, textvariable=self.status_bar)
         self.label.grid(column=0, row=2, sticky=(tk.W), columnspan=4)
 
         #print(self.scale)
+        # carrega imagens
         
 		
         self.columnconfigure(0, weight=1)
@@ -116,6 +128,8 @@ class App(tk.Tk):
         content.columnconfigure(2, weight=3)
         content.columnconfigure(3, weight=1)
         content.rowconfigure(0, weight=1)
+
+
 
         # Create some widgets
         #self.my_label = tk.Label(self, text="Hello World!", font=("Helvetica", 42))

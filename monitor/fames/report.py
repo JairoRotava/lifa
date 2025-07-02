@@ -402,7 +402,9 @@ def plot_history(axes, df, highlight = None):
     #host.set_xlim(0, None)
     ax1.set_ylim(0, max(ch4)/0.8)
     ax2.set_ylim(0, max(co2)/0.8)
-    ax3.set_ylim(0.5, 1/0.8)
+    #ax3.set_ylim(0.5, 1/0.8)
+    ax3.set_ylim(70, 110)
+    
     
 
     #host.set_xlabel("BIN")
@@ -415,7 +417,7 @@ def plot_history(axes, df, highlight = None):
 
     p1 = ax1.plot(time, ch4, color=color1, label="CH4", marker='o', linestyle=':')
     p2 = ax2.plot(time, co2, color=color2, label="CO2", marker='o', linestyle=':')
-    p3 = ax3.plot(time, ce, color=color3, label="CE", marker='o', linestyle=':')
+    p3 = ax3.plot(time, ce*100, color=color3, label="CE", marker='o', linestyle=':')
     ax1.set_title("Emissions")
 
     ax1.legend(handles=p1+p2+p3, loc='upper right')
@@ -462,7 +464,7 @@ def update_simple_dashboard( dashboard, df, meas=-1):
    
    row = df.iloc[meas]
    id = df.index.get_loc(row.name)
-   info = ('Total measurements: {}\nShowing measurement: {}\nFile: {}\nStart time: {}\nStop time {:.2f}\nCE: {:.2f}%\nCH4: {:.2f} ppm\nCO2: {:.2f} ppm\nFluo: {:.2f}%'.format(
+   info = ('Total measurements: {}\nShowing measurement: {}\nFile: {}\nStart time: {}\nStop time {}\nCE: {:.2f}%\nCH4: {:.2f} ppm\nCO2: {:.2f} ppm\nFluo: {:.2f}%'.format(
       len(df.index),
       id + 1,
       os.path.basename(row['file_name'][0]),
