@@ -435,7 +435,7 @@ def plot_history(axes, df, highlight = None):
     if highlight is not None:
         ax1.plot(time[highlight], ch4[highlight], 'r*')
         ax2.plot(time[highlight], co2[highlight], 'r*')
-        ax3.plot(time[highlight], ce[highlight], 'r*')
+        ax3.plot(time[highlight], ce[highlight]*100, 'r*')
 
 
 def create_simple_dashboard(fig):
