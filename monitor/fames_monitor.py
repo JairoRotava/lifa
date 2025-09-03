@@ -223,8 +223,8 @@ class App(tk.Tk):
                     try:
                         #fames.files.process_licel(file, processed_file)
                         fames.files.process_emissions(file, processed_file, self.calibration)
-                    except:
-                        print("Error processing {}".format(file))
+                    except Exception as e:
+                        print("Error processing {}: {}".format(file,e))
                     else:
                         self.processed_files.append(processed_file)
                         new_file = True
