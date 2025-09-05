@@ -40,6 +40,8 @@ There are many modifications to adapt the code to ours lab applications, so the 
 
 Use "pip install ." to use this package.
 
+"pip install -e . " para desenvolvimento do codigo fonte
+
 or
 
 "pip install atmospheric-lidar"

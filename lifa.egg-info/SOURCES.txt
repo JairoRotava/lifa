@@ -16,6 +16,17 @@ lifa.egg-info/dependency_links.txt
 lifa.egg-info/entry_points.txt
 lifa.egg-info/requires.txt
 lifa.egg-info/top_level.txt
+lifa/processing/__init__.py
+lifa/processing/constants.py
+lifa/processing/depolarization.py
+lifa/processing/elastic_retrievals.py
+lifa/processing/error_functions.py
+lifa/processing/fit_checks.py
+lifa/processing/gluing_damico.py
+lifa/processing/helper_functions.py
+lifa/processing/hsrl_retrieval.py
+lifa/processing/pre_processing.py
+lifa/processing/raman_retrievals.py
 lifa/scripts/__init__.py
 lifa/scripts/licel2scc.py
 lifa/scripts/licel2scc_depol.py

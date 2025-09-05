@@ -31,7 +31,7 @@ def find_version(*file_paths):
 
 # Run setup
 setup(name='lifa',
-      packages=['lifa', 'lifa.scripts', 'lifa.systems'],
+      packages=['lifa', 'lifa.scripts', 'lifa.systems', 'lifa.processing'],
       version=find_version("lifa", "__init__.py"),
       description='Package for reading raw atmospheric lidar data.',
       long_description=long_description,
