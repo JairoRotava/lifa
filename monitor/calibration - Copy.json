@@ -7,16 +7,16 @@
     "g_sp_ch4": 0,
     "g_ce_relative": 0.16,
     "pre_flare_bins": [
-        100,
-        115
+        80,
+        100
     ],
     "post_flare_bins": [
-        124,
+        120,
         140
     ],
     "flare_bins": [
-        116,
-        120
+        104,
+        109
     ],
     "background_bins": [
         15000,

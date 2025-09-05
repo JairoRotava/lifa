@@ -21,6 +21,13 @@ def test_calculate_rc():
     channel.calculate_rc()
     assert 1 == 1
 
+def test_photon_counting():
+    files = glob.glob('./tests/tests_data/measurement_1/*')
+    measurements = licel.LicelLidarMeasurement(files)
+    channel = measurements.channels['00355.o_ph']
+    assert 1 == 1
+
+
 if __name__ == "__main__":
     pytest.main()
 

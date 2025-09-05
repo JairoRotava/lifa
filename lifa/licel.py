@@ -129,13 +129,14 @@ class LicelChannelData:
         """ Calculate physically-meaningful data from raw channel data:
 
         * In case of analog signals, the data are converted to mV.
-        * In case of photon counting signals, data are stored as number of photons.
+        * In case of photon counting signals, data are converte to MHz
 
         In addition, some ancillary variables are also calculated (z, dz, number_of_bins).
         """
 
         norm = self.raw_data / float(self.number_of_shots)
         dz = self.bin_width
+        dz_seconds = dz * 2 / 3e8
 
         if self.is_analog:
             # If the channel is in analog mode
@@ -149,8 +150,15 @@ class LicelChannelData:
                 channel_data = norm * ADCrange / (
                             (2 ** self.adcbits) - 1)  # Licel LabView code has a bug (does not account -1).
 
+            self.unit = "mV"
         else:
-            channel_data = norm * self.number_of_shots
+            # Photon Counting
+            #channel_data = norm * self.number_of_shots
+            # Convert acumulated shots in MHz
+            channel_data = norm / dz_seconds * 1e-6
+            self.unit = "MHz"
+            
+            
 
         # Calculate Z
         self.z = np.array([dz * bin_number + dz / 2.0 for bin_number in range(self.data_points)])
@@ -519,6 +527,7 @@ class LicelChannel(LidarChannel):
 
         self.binwidth = self.resolution * 2. / c  # in seconds
         self.z = file_channel.z
+        self.unit = file_channel.unit
 
         self.data[current_file.start_time] = file_channel.data
         self.raw_info.append(file_channel.raw_info)
