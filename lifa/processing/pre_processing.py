@@ -71,6 +71,39 @@ def correct_dead_time_nonparalyzable(signal, measurement_interval, dead_time):
     return corrected_signal
 
 
+def correct_dead_time_nonparalyzable_mhz(signal, dead_time):
+    """ Apply non-paralizable dead time correction.
+        
+    The signal can be either a 1D array or a 2D array with dimensions (time, range).
+
+    Parameters
+    ----------
+    signal: integer array
+       The measured count rate of photons (MHz)
+    dead_time: float
+       The detector system dead time in (MHz/1)
+    
+    Returns
+    -------
+    corrected_signal: float array
+       The true number of photons arriving at the detector    
+    """
+
+    if dead_time == 0:
+        return signal  # Nothing to correct for 0 dead time.
+
+    # Maximum number of photons are limited by dead time
+    max_photons = 1/dead_time
+
+    if np.any(signal > max_photons):
+        raise ValueError(
+            "Signal contains photons above the maximum number permitted by the dead time value. Max: {0}. Found: {1}".format(
+                max_photons, np.max(signal)))
+
+    corrected_signal = signal / (1 - signal * dead_time)
+    return corrected_signal
+
+
 def correct_dead_time_paralyzable(signal, measurement_interval, dead_time):
     """ Apply paralyzable dead time correction.
 
@@ -564,9 +597,9 @@ def glue_signals_1d(lower_signal, upper_signal, window_length=200, correlation_t
     Parameters
     ----------
     lower_signal: array
-       The low-range signal to be used.
+       The low-range (strong/near) signal to be used.
     upper_signal: array
-       The high-range signal to be used.
+       The high-range (weak/far) signal to be used.
     window_length: int
        The number of bins to be used for gluing
     correlation_threshold: float
@@ -590,6 +623,8 @@ def glue_signals_1d(lower_signal, upper_signal, window_length=200, correlation_t
     -------
     glued_signal: array
        The glued signal array, same size as lower_signal and upper_signal.
+    gluing_standard: ???
+       TODO: WTF is this?
     gluing_center_idx: int
        Index choses to perform gluing.
     gluing_score: float
@@ -597,7 +632,7 @@ def glue_signals_1d(lower_signal, upper_signal, window_length=200, correlation_t
     c_lower, c_upper: floats
        Calibration constant of the lower and upper signal. One of them will be 1, depending on the
        value of `use_upper_as_reference` argument.
-    """
+    """      
     lower_signal_cut = lower_signal[min_idx:max_idx]
     upper_signal_cut = upper_signal[min_idx:max_idx]
 
@@ -605,7 +640,10 @@ def glue_signals_1d(lower_signal, upper_signal, window_length=200, correlation_t
                                             intercept_threshold, gaussian_threshold, minmax_threshold)
 
     gluing_center_idx_cut = np.argmax(gluing_score)
-    gluing_center_idx = gluing_center_idx_cut + min_idx  # Index of the original, uncut signals
+    if min_idx is None:
+        gluing_center_idx = gluing_center_idx_cut  # Index of the original, uncut signals
+    else:
+        gluing_center_idx = gluing_center_idx_cut + min_idx  # Index of the original, uncut signals
 
     min_gluing_idx = int(gluing_center_idx - window_length // 2)
     max_gluing_idx = int(gluing_center_idx + window_length // 2)
