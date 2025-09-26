@@ -71,7 +71,7 @@ def correct_dead_time_nonparalyzable(signal, measurement_interval, dead_time):
     return corrected_signal
 
 
-def correct_dead_time_nonparalyzable_mhz(signal, dead_time):
+def correct_count_rate_dead_time_nonparalyzable(signal, dead_time):
     """ Apply non-paralizable dead time correction.
         
     The signal can be either a 1D array or a 2D array with dimensions (time, range).
