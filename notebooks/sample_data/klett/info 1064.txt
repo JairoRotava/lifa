@@ -1,0 +1,6 @@
+lambda=1064
+lidar_ratio_aerosol=70,
+index_reference=1338,
+reference_range=134,
+beta_aerosol_reference=1E-8,
+bin_length=7.47146

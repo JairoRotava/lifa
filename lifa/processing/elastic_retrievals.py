@@ -7,7 +7,8 @@ Retrieval of aerosol optical properties from elastic lidar signals.
 
 import numpy as np
 from scipy.signal import savgol_filter
-from scipy.integrate import cumtrapz
+#from scipy.integrate import cumtrapz
+from scipy.integrate import cumulative_trapezoid
 
 
 def klett_backscatter_aerosol(range_corrected_signal, lidar_ratio_aerosol, beta_molecular, index_reference,
@@ -192,10 +193,12 @@ def _integrate_from_reference(integral_argument, index_reference, bin_length):
        The cumulative integral from the reference point.
     """
     # Integrate from the reference point towards the beginning
-    tau_integral_below = cumtrapz(integral_argument[:index_reference + 1][::-1], dx=-bin_length)[::-1]
+#    tau_integral_below = cumtrapz(integral_argument[:index_reference + 1][::-1], dx=-bin_length)[::-1]
+    tau_integral_below = cumulative_trapezoid(integral_argument[:index_reference + 1][::-1], dx=-bin_length)[::-1]
 
     # Integrate from the reference point towards the end
-    tau_integral_above = cumtrapz(integral_argument[index_reference:], dx=bin_length)
+#    tau_integral_above = cumtrapz(integral_argument[index_reference:], dx=bin_length)
+    tau_integral_above = cumulative_trapezoid(integral_argument[index_reference:], dx=bin_length)
 
     # Join the arrays and set a 0 value for the reference point.
     tau_integral = np.concatenate([tau_integral_below, np.zeros(1), tau_integral_above])
