@@ -11,6 +11,9 @@ from scipy.signal import savgol_filter
 from .helper_functions import molecular_extinction, molecular_backscatter, number_density_at_pt, poly_evaluate_window
 from .elastic_retrievals import _integrate_from_reference
 
+# The particle extinction coefficient is determined from the inelastic-backscatter signal profile (Raman)
+# The particle backscatter coerricient is derived from the ratio of the elasctic backscatter to the Raman signal
+
 
 def raman_extinction(signal, dz, emission_wavelength, raman_wavelength, angstrom_aerosol, temperature, pressure,
                      window_size, order):
@@ -22,7 +25,7 @@ def raman_extinction(signal, dz, emission_wavelength, raman_wavelength, angstrom
     Parameters
     ----------
     signal : (M,) array
-       The range_corrected molecular signal. Should be 1D array of size M.
+       The range_corrected (Raman??) molecular signal. Should be 1D array of size M.
     dz : float
        Altitude step, used in the derivative [m]
     emission_wavelength, raman_wavelength : float
@@ -119,7 +122,7 @@ def retrieve_raman_extinction(signal, dz, emission_wavelength, raman_wavelength,
     return alpha_aer
 
 
-def raman_backscatter(signal_raman, signal_emission, dz, reference_idx, alpha_aerosol_emission, angstrom_aerosol,
+def raman_backscatter(signal_raman, signal_emission, dz, reference_idx, alpha_aerosol_extinction, angstrom_aerosol,
                       elastic_wavelength, raman_wavelength, pressure, temperature, beta_aer_ref=0,
                       reference_window_size=1, component='total'):
     r"""
@@ -138,7 +141,7 @@ def raman_backscatter(signal_raman, signal_emission, dz, reference_idx, alpha_ae
     reference_idx : int
        It is the index of the reference altitude to find into arrays the quantity (for example the signal) at the
        reference altitude.
-    alpha_aerosol_emission : (M,) array
+    alpha_aerosol_extinction : (M,) array
        The aerosol extinction coefficient at each point of the signal profile for emission and Raman wavelength.
     angstrom_aerosol : float
        Aerosol angstrom exponent.
@@ -187,7 +190,7 @@ def raman_backscatter(signal_raman, signal_emission, dz, reference_idx, alpha_ae
 
     number_density = number_density_at_pt(pressure, temperature)
 
-    backscatter_aer = retrieve_raman_backscatter(signal_raman, signal_emission, dz, alpha_aerosol_emission,
+    backscatter_aer = retrieve_raman_backscatter(signal_raman, signal_emission, dz, alpha_aerosol_extinction,
                                                  angstrom_aerosol, elastic_wavelength, raman_wavelength, reference_idx,
                                                  number_density, alpha_mol_emmision, alpha_mol_raman,
                                                  beta_mol_emmision, beta_aer_ref, reference_window_size)
@@ -195,10 +198,7 @@ def raman_backscatter(signal_raman, signal_emission, dz, reference_idx, alpha_ae
     return backscatter_aer
 
 
-def retrieve_raman_backscatter(signal_raman, signal_emission, dz, alpha_aerosol_emission, angstrom_aerosol,
-                               elastic_wavelength, raman_wavelength, reference_idx, number_density,
-                               alpha_molecular_emmision, alpha_molecular_raman, beta_molecular_emmision, beta_aer_ref=0,
-                               reference_window_size=1):
+def retrieve_raman_backscatter(signal_raman, signal_emission, dz, alpha_aerosol_emission, angstrom_aerosol,elastic_wavelength, raman_wavelength, reference_idx, number_density,alpha_molecular_emmision, alpha_molecular_raman, beta_molecular_emmision, beta_aer_ref=0,reference_window_size=1):
     """
     Calculates the aerosol backscatter coefficient based on:
     * Preprocessed elastic & raman signals.
