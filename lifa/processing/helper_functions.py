@@ -291,3 +291,48 @@ def poly_evaluate_window(window, deg=2):
     poly = np.poly1d(np.polyfit(np.arange(len(window)), window, deg))
     value = poly(center_idx)
     return value
+
+def find_nearest(array, value):
+    """
+    Find nearest idx on array to value.
+
+    Parameters
+    ----------
+    array : array
+       Array with distances.
+    value : float
+        Value to look for into array
+
+    Returns
+    -------
+    bin : int
+        The index in array closest to values
+    """  
+    #array = np.asarray(array)
+    idx = (np.abs(array - value)).argmin()
+    return idx
+
+def meters_to_bins(meters, range, z):
+    """
+    Convert meters to bins. Return closest bin to input meter.
+
+    Parameters
+    ----------
+    meters : float
+       The distance in meters.
+    range : float
+        The range distance in float
+    z : array
+         Values of z in meters
+
+    Returns
+    -------
+    bin : int
+        The closes bin in z to input meters.
+    bin_range : int
+         Range in bins close to the range in meteres
+    """
+
+    bin = find_nearest(z, meters)
+    bin_range = find_nearest(z, meters+range/2) - find_nearest(z, meters-range/2)
+    return int(bin), int(bin_range)
