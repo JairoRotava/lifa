@@ -12,7 +12,7 @@ from .helper_functions import molecular_extinction, molecular_backscatter, numbe
 from .elastic_retrievals import _integrate_from_reference
 
 # The particle extinction coefficient is determined from the inelastic-backscatter signal profile (Raman)
-# The particle backscatter coerricient is derived from the ratio of the elasctic backscatter to the Raman signal
+# The particle backscatter coefficient is derived from the ratio of the elasctic backscatter to the Raman signal
 
 
 def raman_extinction(signal, dz, emission_wavelength, raman_wavelength, angstrom_aerosol, temperature, pressure,
