@@ -1,0 +1,200 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import glob
+import os
+import math
+from scipy.signal import find_peaks
+from importlib import reload
+import json
+import pandas as pd
+
+
+from lifa.licel import LicelLidarMeasurement
+from lifa.processing import fit_checks
+from lifa.processing import pre_processing
+from lifa.processing import helper_functions
+from lifa.processing import raman_mixing_ratio
+from lifa.processing import raman_retrievals
+
+
+# Parametros de calibração
+config = {
+    'cross_talk_355_353': 160,
+    'ch4_cal': 4000,
+    'co2_cal': 26000,
+    'ce_cal': 0.25,
+    'fluo_cal': 100,
+    'z_ref_idx': 96,
+    'z_flare_idx': 106,
+    'dead_time': 1/240,
+    'background_min_idx': 12000,
+    'background_max_idx' : 15000,
+    'z_min_flare': 350,
+    'z_max_flare': 450,
+    'n2_raman': {'channel':'00353.o_an', 'bin_shift':0},
+    'rayleigh': {'channel':'00355.o_an', 'bin_shift':0},
+    'co2_raman': {'channel':'00371.o_ph', 'bin_shift':4},
+    'ch4_raman_s': {'channel':'00395.s_ph', 'bin_shift':4},
+    'ch4_raman_p': {'channel':'00395.p_ph', 'bin_shift':4},
+    'fluorescence': {'channel':'00460.o_an', 'bin_shift':1},
+}
+
+files = [ r'.\notebooks\sample_data\20241204_CEPEMA_FLARE_acima da chama_p=23\a24C0506.022272',
+        r'.\notebooks\\sample_data\20241204_CEPEMA_FLARE_acima da chama_p=23\a24C0505.552826', 
+        r'.\notebooks\\sample_data\20241204_CEPEMA_FLARE_acima da chama_p=23\a24C0505.560971', 
+        r'.\notebooks\\sample_data\20241204_CEPEMA_FLARE_acima da chama_p=23\a24C0505.565115', 
+        r'.\notebooks\\sample_data\20241204_CEPEMA_FLARE_acima da chama_p=23\a24C0505.573260', 
+        r'.\notebooks\\sample_data\20241204_CEPEMA_FLARE_acima da chama_p=23\a24C0505.581404', 
+        r'.\notebooks\\sample_data\20241204_CEPEMA_FLARE_acima da chama_p=23\a24C0505.585549', 
+        r'.\notebooks\\sample_data\20241204_CEPEMA_FLARE_acima da chama_p=23\a24C0505.593694', 
+        r'.\notebooks\\sample_data\20241204_CEPEMA_FLARE_acima da chama_p=23\a24C0506.001838', 
+        r'.\notebooks\\sample_data\20241204_CEPEMA_FLARE_acima da chama_p=23\a24C0506.005984', 
+        r'.\notebooks\\sample_data\20241204_CEPEMA_FLARE_acima da chama_p=23\a24C0506.014128',
+        ]
+
+
+def emissions(files, config):
+
+
+    measurement_all = LicelLidarMeasurement(files)
+
+    channels = ['n2_raman', 'rayleigh', 'co2_raman', 'ch4_raman_s', 'ch4_raman_p', 'fluorescence']
+
+    # define z
+    z = measurement_all.channels[config['rayleigh']['channel']].z
+
+    bin_width = measurement_all.channels[config['rayleigh']['channel']].resolution
+
+    # Pre processamento
+    signal = {}
+    for c in channels:
+        temp = measurement_all.channels[config[c]['channel']]
+
+        # Faz média e corrige dead time
+        if temp.is_photon_counting:
+            s = pre_processing.correct_count_rate_dead_time_nonparalyzable(temp.average_profile(),config['dead_time'])
+        else:
+            s = temp.average_profile()
+
+        # Remove backgroun
+        signal[c], bg_mean, bg_std = pre_processing.subtract_background(s, config['background_min_idx'], config['background_max_idx'])
+
+        # Corrige bin shift
+        signal[c] = pre_processing.correct_trigger_delay_bins(signal[c], config[c]['bin_shift'])
+
+    # remove crosstalk do 355 no 353
+    signal['n2_raman'] = signal['n2_raman'] - (signal['rayleigh']/config['cross_talk_355_353'])
+  
+    # Faz correção de range
+    signal_rc = {}
+    for key,val in signal.items():
+        signal_rc[key] = pre_processing.apply_range_correction(val, z)
+
+    # Calcula molecular a partir de atmosfera padrão
+    elevation_angle = 12
+    elevation = 0
+    bin_min = helper_functions.find_nearest(z, config['z_min_flare'])
+    bin_max = helper_functions.find_nearest(z, config['z_max_flare'])
+    height = z * math.sin(math.radians(elevation_angle)) + elevation 
+
+    # Modelo Padrão Atmosfera
+    pressure, temperature, density = helper_functions.standard_atmosphere(height)
+
+    # Calcula extinction rate para aerosol a partir de sinal Raman
+    #alpha_aer =  raman_retrievals.raman_extinction(signal_rc['n2_raman_353'],    # array sinal raman com range correction
+    #                                bin_width,   # tamanho de cada bin em metros
+    #                                355, # comprimento de onda do laser/rayleigh
+    #                                353,    # comprimento de onda sinal raman
+    #                                angstrom_aerosol=1,    # fator de relação. Geralmente por volta de 1
+    #                                temperature=temperature,   # array com temperatura do ar
+    #                                pressure=pressure,     # array com pressão do ar
+    #                                window_size=5,     # deve ser algum tipo de janela para filtro
+    #                                order = 4)         # ordem de algum tipo de filtro
+
+
+    # O calculo de extinction rate por ramana não fica bom com o sinal Raman do N2. Usa tudo zero por enquanto
+    alpha_aer = np.zeros_like(height)
+
+    # co2 mixing ratio
+    co2_mixing_ratio = raman_mixing_ratio.raman_mixing_ratio(signal_rc['co2_raman'], 
+                                        signal_rc['n2_raman'], 
+                                        3.75, 
+                                        alpha_aer, 
+                                        config['co2_cal'], 
+                                        371, 
+                                        353, 
+                                        pressure, 
+                                        temperature)
+
+    # ch4 mixing ratio
+    ch4_mixing_ratio = raman_mixing_ratio.raman_mixing_ratio(signal_rc['ch4_raman_p'], 
+                                        signal_rc['n2_raman'], 
+                                        3.75, 
+                                        alpha_aer, 
+                                        config['ch4_cal'], 
+                                        395, 
+                                        353, 
+                                        pressure, 
+                                        temperature)
+    
+    # ce mixing ration
+    ce_mixing_ratio = raman_mixing_ratio.raman_mixing_ratio(signal_rc['ch4_raman_p'], 
+                                      signal_rc['co2_raman'], 
+                                      3.75, 
+                                      alpha_aer, 
+                                      config['ce_cal'], 
+                                      395, 
+                                      371, 
+                                      pressure, 
+                                      temperature)
+    ce = 1/(1 + ce_mixing_ratio) * 100
+
+    # Fluorescence
+    fluo_mixing_ratio = raman_mixing_ratio.raman_mixing_ratio(signal_rc['fluorescence'], 
+                                      signal_rc['n2_raman'], 
+                                      3.75, 
+                                      alpha_aer, 
+                                      config['fluo_cal'], 
+                                      460, 
+                                      353, 
+                                      pressure, 
+                                      temperature)
+    
+    # Detecta pico
+    min_distance_idx = helper_functions.find_nearest(100, z)
+    max_distance_idx = helper_functions.find_nearest(600, z)
+    peaks, _ = find_peaks(signal['rayleigh'][min_distance_idx: max_distance_idx], width=1,  threshold=2)
+    peak_idx =  peaks[0] + min_distance_idx
+    pre_peak_idx = peak_idx - 10
+
+    output = {
+        'start_time' : measurement_all.info['start_time'],
+        'stop_time' : measurement_all.info['stop_time'],
+        'duration' : measurement_all.info['duration'],
+        'cross_talk_355_353': config['cross_talk_355_353'],
+        'ch4_cal': config['ch4_cal'],
+        'co2_cal': config['co2_cal'],
+        'ce_cal': config['ce_cal'],
+        'fluo_cal': config['fluo_cal'],
+        'z_ref': z[pre_peak_idx],
+        'co2_ref': co2_mixing_ratio[pre_peak_idx],
+        'ch4_ref': ch4_mixing_ratio[pre_peak_idx],
+        'ce_ref': ce[pre_peak_idx],
+        'ce_m_ref': ce_mixing_ratio[pre_peak_idx],
+        'fluo_ref': fluo_mixing_ratio[pre_peak_idx],
+        'z': z[peak_idx],
+        'co2': co2_mixing_ratio[peak_idx],
+        'ch4': ch4_mixing_ratio[peak_idx],
+        'ce': ce[peak_idx],
+        'ce_m': ce_mixing_ratio[peak_idx],
+        'fluo': fluo_mixing_ratio[peak_idx],
+        'number_of_files': len(measurement_all.files),
+        'files': [measurement_all.files],
+    }
+
+    df = pd.DataFrame.from_dict(output)
+    return(df)
+    
+if __name__ == "__main__":
+    e = emissions(files, config)
+    print(e)
