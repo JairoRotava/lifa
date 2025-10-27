@@ -15,10 +15,9 @@ from lifa.processing import pre_processing
 from lifa.processing import helper_functions
 from lifa.processing import raman_mixing_ratio
 from lifa.processing import raman_retrievals
+from .files import group_files
 
-
-# Parametros de calibração
-config = {
+default_config = {
     'cross_talk_355_353': 160,
     'ch4_cal': 4000,
     'co2_cal': 26000,
@@ -29,31 +28,18 @@ config = {
     'dead_time': 1/240,
     'background_min_idx': 12000,
     'background_max_idx' : 15000,
-    'z_min_flare': 350,
-    'z_max_flare': 450,
-    'n2_raman': {'channel':'00353.o_an', 'bin_shift':0},
-    'rayleigh': {'channel':'00355.o_an', 'bin_shift':0},
-    'co2_raman': {'channel':'00371.o_ph', 'bin_shift':4},
-    'ch4_raman_s': {'channel':'00395.s_ph', 'bin_shift':4},
-    'ch4_raman_p': {'channel':'00395.p_ph', 'bin_shift':4},
-    'fluorescence': {'channel':'00460.o_an', 'bin_shift':1},
+    'z_min_flare': 100,
+    'z_max_flare': 700,
+    'n2_raman': {'channel':'00353.o_an', 'bin_shift':0, 'lambda': 323},
+    'rayleigh': {'channel':'00355.o_an', 'bin_shift':0, 'lambda': 355},
+    'co2_raman': {'channel':'00371.o_ph', 'bin_shift':4, 'lambda': 371},
+    'ch4_raman_s': {'channel':'00395.s_ph', 'bin_shift':4, 'lambda': 395},
+    'ch4_raman_p': {'channel':'00395.p_ph', 'bin_shift':4, 'lambda': 395},
+    'fluorescence': {'channel':'00460.o_an', 'bin_shift':1, 'lambda': 460},
 }
 
-files = [ r'.\notebooks\sample_data\20241204_CEPEMA_FLARE_acima da chama_p=23\a24C0506.022272',
-        r'.\notebooks\\sample_data\20241204_CEPEMA_FLARE_acima da chama_p=23\a24C0505.552826', 
-        r'.\notebooks\\sample_data\20241204_CEPEMA_FLARE_acima da chama_p=23\a24C0505.560971', 
-        r'.\notebooks\\sample_data\20241204_CEPEMA_FLARE_acima da chama_p=23\a24C0505.565115', 
-        r'.\notebooks\\sample_data\20241204_CEPEMA_FLARE_acima da chama_p=23\a24C0505.573260', 
-        r'.\notebooks\\sample_data\20241204_CEPEMA_FLARE_acima da chama_p=23\a24C0505.581404', 
-        r'.\notebooks\\sample_data\20241204_CEPEMA_FLARE_acima da chama_p=23\a24C0505.585549', 
-        r'.\notebooks\\sample_data\20241204_CEPEMA_FLARE_acima da chama_p=23\a24C0505.593694', 
-        r'.\notebooks\\sample_data\20241204_CEPEMA_FLARE_acima da chama_p=23\a24C0506.001838', 
-        r'.\notebooks\\sample_data\20241204_CEPEMA_FLARE_acima da chama_p=23\a24C0506.005984', 
-        r'.\notebooks\\sample_data\20241204_CEPEMA_FLARE_acima da chama_p=23\a24C0506.014128',
-        ]
 
-
-def emissions(files, config):
+def emissions(files, config=default_config):
 
 
     measurement_all = LicelLidarMeasurement(files)
@@ -118,33 +104,33 @@ def emissions(files, config):
     # co2 mixing ratio
     co2_mixing_ratio = raman_mixing_ratio.raman_mixing_ratio(signal_rc['co2_raman'], 
                                         signal_rc['n2_raman'], 
-                                        3.75, 
+                                        bin_width, 
                                         alpha_aer, 
                                         config['co2_cal'], 
-                                        371, 
-                                        353, 
+                                        config['co2_raman']['lambda'], 
+                                        config['n2_raman']['lambda'], 
                                         pressure, 
                                         temperature)
 
     # ch4 mixing ratio
     ch4_mixing_ratio = raman_mixing_ratio.raman_mixing_ratio(signal_rc['ch4_raman_p'], 
                                         signal_rc['n2_raman'], 
-                                        3.75, 
+                                        bin_width, 
                                         alpha_aer, 
                                         config['ch4_cal'], 
-                                        395, 
-                                        353, 
+                                        config['ch4_raman_p']['lambda'], 
+                                        config['n2_raman']['lambda'], 
                                         pressure, 
                                         temperature)
     
     # ce mixing ration
     ce_mixing_ratio = raman_mixing_ratio.raman_mixing_ratio(signal_rc['ch4_raman_p'], 
                                       signal_rc['co2_raman'], 
-                                      3.75, 
+                                      bin_width, 
                                       alpha_aer, 
                                       config['ce_cal'], 
-                                      395, 
-                                      371, 
+                                      config['ch4_raman_p']['lambda'],
+                                      config['co2_raman']['lambda'],
                                       pressure, 
                                       temperature)
     ce = 1/(1 + ce_mixing_ratio) * 100
@@ -152,17 +138,17 @@ def emissions(files, config):
     # Fluorescence
     fluo_mixing_ratio = raman_mixing_ratio.raman_mixing_ratio(signal_rc['fluorescence'], 
                                       signal_rc['n2_raman'], 
-                                      3.75, 
+                                      bin_width, 
                                       alpha_aer, 
                                       config['fluo_cal'], 
-                                      460, 
-                                      353, 
+                                      config['fluorescence']['lambda'],
+                                      config['n2_raman']['lambda'],
                                       pressure, 
                                       temperature)
     
     # Detecta pico
-    min_distance_idx = helper_functions.find_nearest(100, z)
-    max_distance_idx = helper_functions.find_nearest(600, z)
+    min_distance_idx = bin_min
+    max_distance_idx = bin_max
     peaks, _ = find_peaks(signal['rayleigh'][min_distance_idx: max_distance_idx], width=1,  threshold=2)
     peak_idx =  peaks[0] + min_distance_idx
     pre_peak_idx = peak_idx - 10
@@ -171,6 +157,7 @@ def emissions(files, config):
         'start_time' : measurement_all.info['start_time'],
         'stop_time' : measurement_all.info['stop_time'],
         'duration' : measurement_all.info['duration'],
+        'bin_width': bin_width,
         'cross_talk_355_353': config['cross_talk_355_353'],
         'ch4_cal': config['ch4_cal'],
         'co2_cal': config['co2_cal'],
@@ -182,19 +169,39 @@ def emissions(files, config):
         'ce_ref': ce[pre_peak_idx],
         'ce_m_ref': ce_mixing_ratio[pre_peak_idx],
         'fluo_ref': fluo_mixing_ratio[pre_peak_idx],
-        'z': z[peak_idx],
+        'z_flare': z[peak_idx],
         'co2': co2_mixing_ratio[peak_idx],
         'ch4': ch4_mixing_ratio[peak_idx],
         'ce': ce[peak_idx],
         'ce_m': ce_mixing_ratio[peak_idx],
         'fluo': fluo_mixing_ratio[peak_idx],
+        'z_trace': [z[min_distance_idx:max_distance_idx]],
+        'ch4_mixing_trace': [ch4_mixing_ratio[min_distance_idx:max_distance_idx]],
+        'co2_mixing_trace': [co2_mixing_ratio[min_distance_idx:max_distance_idx]],
+        'ce_mixing_trace': [ce_mixing_ratio[min_distance_idx:max_distance_idx]],
+        'ce_trace': [ce[min_distance_idx:max_distance_idx]],
+        'fluo_mixing_trace': [fluo_mixing_ratio[min_distance_idx:max_distance_idx]],
+        'n2_raman_trace': [signal['n2_raman'][min_distance_idx:max_distance_idx]],
+        'rayleigh_trace': [signal['rayleigh'][min_distance_idx:max_distance_idx]],
+        'co2_raman_trace': [signal['co2_raman'][min_distance_idx:max_distance_idx]],
+        'ch4_raman_s_trace': [signal['ch4_raman_s'][min_distance_idx:max_distance_idx]],
+        'ch4_raman_p_trace': [signal['ch4_raman_p'][min_distance_idx:max_distance_idx]],
+        'fluorescence_trace': [signal['fluorescence'][min_distance_idx:max_distance_idx]],
         'number_of_files': len(measurement_all.files),
         'files': [measurement_all.files],
     }
 
+
     df = pd.DataFrame.from_dict(output)
     return(df)
+
+
+def emissions_group(files, config=default_config, step=1, size=1):
+    group = group_files(files, step, size)
+    results = []
+    for f in group:
+        df = emissions(f, config)
+        results.append(df)
+    output = pd.concat(results, ignore_index=True)
+    return output
     
-if __name__ == "__main__":
-    e = emissions(files, config)
-    print(e)
