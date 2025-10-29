@@ -18,6 +18,8 @@ from lifa.processing import raman_retrievals
 from .files import group_files
 
 default_config = {
+    'zenith_angle': 12,
+    'elevation': 0,
     'cross_talk_355_353': 160,
     'ch4_cal': 4000,
     'co2_cal': 26000,
@@ -30,12 +32,17 @@ default_config = {
     'background_max_idx' : 15000,
     'z_min_flare': 100,
     'z_max_flare': 700,
+    'flare_roi': 10,
+    'flare_pos': 400,
     'n2_raman': {'channel':'00353.o_an', 'bin_shift':0, 'lambda': 323},
     'rayleigh': {'channel':'00355.o_an', 'bin_shift':0, 'lambda': 355},
     'co2_raman': {'channel':'00371.o_ph', 'bin_shift':4, 'lambda': 371},
     'ch4_raman_s': {'channel':'00395.s_ph', 'bin_shift':4, 'lambda': 395},
     'ch4_raman_p': {'channel':'00395.p_ph', 'bin_shift':4, 'lambda': 395},
     'fluorescence': {'channel':'00460.o_an', 'bin_shift':1, 'lambda': 460},
+    'n2_raman_b': {'channel':'00530.o_an', 'bin_shift':0, 'lambda': 530},
+    'rayleigh_b': {'channel':'00532.o_an', 'bin_shift':0, 'lambda': 532},
+
 }
 
 
@@ -44,7 +51,7 @@ def emissions(files, config=default_config):
 
     measurement_all = LicelLidarMeasurement(files)
 
-    channels = ['n2_raman', 'rayleigh', 'co2_raman', 'ch4_raman_s', 'ch4_raman_p', 'fluorescence']
+    channels = ['n2_raman', 'rayleigh', 'co2_raman', 'ch4_raman_s', 'ch4_raman_p', 'fluorescence', 'n2_raman_b', 'rayleigh_b']
 
     # define z
     z = measurement_all.channels[config['rayleigh']['channel']].z
@@ -77,8 +84,8 @@ def emissions(files, config=default_config):
         signal_rc[key] = pre_processing.apply_range_correction(val, z)
 
     # Calcula molecular a partir de atmosfera padrão
-    elevation_angle = 12
-    elevation = 0
+    elevation_angle = config['zenith_angle']
+    elevation = config['elevation']
     bin_min = helper_functions.find_nearest(z, config['z_min_flare'])
     bin_max = helper_functions.find_nearest(z, config['z_max_flare'])
     height = z * math.sin(math.radians(elevation_angle)) + elevation 
@@ -146,12 +153,30 @@ def emissions(files, config=default_config):
                                       pressure, 
                                       temperature)
     
-    # Detecta pico
+    # Detecta pico se declarado como None, senão usa distancia fornecida
     min_distance_idx = bin_min
     max_distance_idx = bin_max
-    peaks, _ = find_peaks(signal['rayleigh'][min_distance_idx: max_distance_idx], width=1,  threshold=2)
-    peak_idx =  peaks[0] + min_distance_idx
-    pre_peak_idx = peak_idx - 10
+    if config['flare_pos'] is None:
+        peaks, _ = find_peaks(signal['rayleigh'][min_distance_idx: max_distance_idx], width=1,  threshold=2)
+        peak_idx =  peaks[0] + min_distance_idx
+        pre_peak_idx = peak_idx - 10
+    else:
+        peak_idx = helper_functions.find_nearest(config['flare_pos'], z)
+        pre_peak_idx = peak_idx - 10
+
+    # Retira valores de CE, CO2, CH4 e fluorescencia do range definidos
+    roi_bin_min = helper_functions.find_nearest(config['flare_pos'] - config['flare_roi'], z)
+    roi_bin_max = helper_functions.find_nearest(config['flare_pos'] + config['flare_roi'], z)
+    ce_peak = np.min(ce[roi_bin_min:roi_bin_max])
+    ch4_peak = np.max(ch4_mixing_ratio[roi_bin_min:roi_bin_max])
+    co2_peak = np.max(co2_mixing_ratio[roi_bin_min:roi_bin_max])
+    fluo_peak = np.max(fluo_mixing_ratio[roi_bin_min:roi_bin_max])
+    ce_m_peak = np.max(ce_mixing_ratio[roi_bin_min:roi_bin_max])
+    
+
+
+
+
 
     output = {
         'start_time' : measurement_all.info['start_time'],
@@ -170,11 +195,13 @@ def emissions(files, config=default_config):
         'ce_m_ref': ce_mixing_ratio[pre_peak_idx],
         'fluo_ref': fluo_mixing_ratio[pre_peak_idx],
         'z_flare': z[peak_idx],
-        'co2': co2_mixing_ratio[peak_idx],
-        'ch4': ch4_mixing_ratio[peak_idx],
-        'ce': ce[peak_idx],
-        'ce_m': ce_mixing_ratio[peak_idx],
-        'fluo': fluo_mixing_ratio[peak_idx],
+        'z_min_roi': config['flare_pos'] - config['flare_roi'],
+        'z_max_roi': config['flare_pos'] + config['flare_roi'],
+        'co2': co2_peak,
+        'ch4': ch4_peak,
+        'ce': ce_peak,
+        'ce_m': ce_m_peak,
+        'fluo': fluo_peak,
         'z_trace': [z[min_distance_idx:max_distance_idx]],
         'ch4_mixing_trace': [ch4_mixing_ratio[min_distance_idx:max_distance_idx]],
         'co2_mixing_trace': [co2_mixing_ratio[min_distance_idx:max_distance_idx]],
@@ -187,6 +214,8 @@ def emissions(files, config=default_config):
         'ch4_raman_s_trace': [signal['ch4_raman_s'][min_distance_idx:max_distance_idx]],
         'ch4_raman_p_trace': [signal['ch4_raman_p'][min_distance_idx:max_distance_idx]],
         'fluorescence_trace': [signal['fluorescence'][min_distance_idx:max_distance_idx]],
+        'rayleigh_b_trace': [signal['rayleigh_b'][min_distance_idx:max_distance_idx]],
+        'n2_raman_b_trace': [signal['n2_raman_b'][min_distance_idx:max_distance_idx]],
         'number_of_files': len(measurement_all.files),
         'files': [measurement_all.files],
     }
