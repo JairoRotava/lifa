@@ -32,8 +32,8 @@ default_config = {
     'background_max_idx' : 15000,
     'z_min_flare': 100,
     'z_max_flare': 700,
-    'flare_roi': 10,
-    'flare_pos': 400,
+ #   'flare_roi': 10,
+ #   'flare_pos': 400,
     'n2_raman': {'channel':'00353.o_an', 'bin_shift':0, 'lambda': 323},
     'rayleigh': {'channel':'00355.o_an', 'bin_shift':0, 'lambda': 355},
     'co2_raman': {'channel':'00371.o_ph', 'bin_shift':4, 'lambda': 371},
@@ -156,22 +156,22 @@ def emissions(files, config=default_config):
     # Detecta pico se declarado como None, senão usa distancia fornecida
     min_distance_idx = bin_min
     max_distance_idx = bin_max
-    if config['flare_pos'] is None:
-        peaks, _ = find_peaks(signal['rayleigh'][min_distance_idx: max_distance_idx], width=1,  threshold=2)
-        peak_idx =  peaks[0] + min_distance_idx
-        pre_peak_idx = peak_idx - 10
-    else:
-        peak_idx = helper_functions.find_nearest(config['flare_pos'], z)
-        pre_peak_idx = peak_idx - 10
+#    if config['flare_pos'] is None:
+#        peaks, _ = find_peaks(signal['rayleigh'][min_distance_idx: max_distance_idx], width=1,  threshold=2)
+#        peak_idx =  peaks[0] + min_distance_idx
+#        pre_peak_idx = peak_idx - 10
+#    else:
+#        peak_idx = helper_functions.find_nearest(config['flare_pos'], z)
+#        pre_peak_idx = peak_idx - 10
 
     # Retira valores de CE, CO2, CH4 e fluorescencia do range definidos
-    roi_bin_min = helper_functions.find_nearest(config['flare_pos'] - config['flare_roi'], z)
-    roi_bin_max = helper_functions.find_nearest(config['flare_pos'] + config['flare_roi'], z)
-    ce_peak = np.min(ce[roi_bin_min:roi_bin_max])
-    ch4_peak = np.max(ch4_mixing_ratio[roi_bin_min:roi_bin_max])
-    co2_peak = np.max(co2_mixing_ratio[roi_bin_min:roi_bin_max])
-    fluo_peak = np.max(fluo_mixing_ratio[roi_bin_min:roi_bin_max])
-    ce_m_peak = np.max(ce_mixing_ratio[roi_bin_min:roi_bin_max])
+    #roi_bin_min = helper_functions.find_nearest(config['flare_pos'] - config['flare_roi'], z)
+    #roi_bin_max = helper_functions.find_nearest(config['flare_pos'] + config['flare_roi'], z)
+    #ce_peak = np.min(ce[roi_bin_min:roi_bin_max])
+    #ch4_peak = np.max(ch4_mixing_ratio[roi_bin_min:roi_bin_max])
+    #co2_peak = np.max(co2_mixing_ratio[roi_bin_min:roi_bin_max])
+    #fluo_peak = np.max(fluo_mixing_ratio[roi_bin_min:roi_bin_max])
+    #ce_m_peak = np.max(ce_mixing_ratio[roi_bin_min:roi_bin_max])
     
 
 
@@ -188,20 +188,20 @@ def emissions(files, config=default_config):
         'co2_cal': config['co2_cal'],
         'ce_cal': config['ce_cal'],
         'fluo_cal': config['fluo_cal'],
-        'z_ref': z[pre_peak_idx],
-        'co2_ref': co2_mixing_ratio[pre_peak_idx],
-        'ch4_ref': ch4_mixing_ratio[pre_peak_idx],
-        'ce_ref': ce[pre_peak_idx],
-        'ce_m_ref': ce_mixing_ratio[pre_peak_idx],
-        'fluo_ref': fluo_mixing_ratio[pre_peak_idx],
-        'z_flare': z[peak_idx],
-        'z_min_roi': config['flare_pos'] - config['flare_roi'],
-        'z_max_roi': config['flare_pos'] + config['flare_roi'],
-        'co2': co2_peak,
-        'ch4': ch4_peak,
-        'ce': ce_peak,
-        'ce_m': ce_m_peak,
-        'fluo': fluo_peak,
+       # 'z_ref': z[pre_peak_idx],
+       # 'co2_ref': co2_mixing_ratio[pre_peak_idx],
+       # 'ch4_ref': ch4_mixing_ratio[pre_peak_idx],
+       # 'ce_ref': ce[pre_peak_idx],
+       # 'ce_m_ref': ce_mixing_ratio[pre_peak_idx],
+       # 'fluo_ref': fluo_mixing_ratio[pre_peak_idx],
+       # 'z_flare': z[peak_idx],
+       # 'z_min_roi': config['flare_pos'] - config['flare_roi'],
+       # 'z_max_roi': config['flare_pos'] + config['flare_roi'],
+       # 'co2': co2_peak,
+       # 'ch4': ch4_peak,
+       # 'ce': ce_peak,
+       # 'ce_m': ce_m_peak,
+       # 'fluo': fluo_peak,
         'z_trace': [z[min_distance_idx:max_distance_idx]],
         'ch4_mixing_trace': [ch4_mixing_ratio[min_distance_idx:max_distance_idx]],
         'co2_mixing_trace': [co2_mixing_ratio[min_distance_idx:max_distance_idx]],

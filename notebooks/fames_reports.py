@@ -2,6 +2,10 @@ import matplotlib.pyplot as plt
 import lifa.fames.process_mixing_ratio as em
 import glob
 import numpy as np
+from lifa.processing import helper_functions
+from datetime import datetime, timedelta
+import string 
+import matplotlib.dates as mdates
 
 
 # --- Configurações de legenda, cores e markers ---
@@ -43,7 +47,7 @@ markers = {
 
 
 
-def plot_signals(output, roi_min, roi_max):
+def plot_signals(output, roi_min, roi_max, title = None):
 
     results = {}
     for index, row in output.iterrows():
@@ -59,7 +63,7 @@ def plot_signals(output, roi_min, roi_max):
                     'rayleigh_532': row['rayleigh_b_trace']
                 },
                 'z_interval' : row['z_trace'],
-                'flare_pos' : row['z_flare'],
+                #'flare_pos' : row['z_flare'],
                 'files' : row['files'],
             }
         
@@ -79,7 +83,10 @@ def plot_signals(output, roi_min, roi_max):
     fig, ax = plt.subplots(nrows=2, ncols=4, figsize=(20, 12), layout='constrained')
     ax = ax.flatten()
 
-    fig.suptitle('Sinais com média', fontsize=18, fontweight='bold')
+    if title is None:
+        fig.suptitle('Sinais com média', fontsize=18, fontweight='bold')
+    else:
+        fig.suptitle(title, fontsize=18, fontweight='bold')
 
     
     title_fontsize = 13
@@ -96,7 +103,7 @@ def plot_signals(output, roi_min, roi_max):
         for j, (group_id, res) in enumerate(results.items()):
             signal_interval = res['signal_interval']
             z_interval = res['z_interval']
-            flare_pos = res['flare_pos']
+            #flare_pos = res['flare_pos']
 
             data = signal_interval[key]
             all_data.append(data)
@@ -200,14 +207,14 @@ colors_m = {
 ymin_values = {
     'CO2/N2': 0,
     'CH4/N2': 0,
-    'CE [%]': 87,
+    'CE [%]': None,
     'FLUO [%]': 0,
 }
 
 ymax_values = {
     'CO2/N2': None,
     'CH4/N2': None,
-    'CE [%]': 101,
+    'CE [%]': None,
     'FLUO [%]': None,
 }
 
@@ -216,23 +223,31 @@ tick_major_size = 14
 tick_minor_size = 12
 
 
-from datetime import datetime, timedelta
-import string 
-import matplotlib.dates as mdates
-def plot_emissions(output, roi_min, roi_max):
+
+
+def plot_emissions(output, roi_min, roi_max, title=None):
     plot_groups_concentration = True
     plot_groups = True
 
     # --- Preparar dados para plotagem temporal (valores máximos) ---
     time_labels = []
-    #max_co2 = []
-    #max_ch4 = []
-    #max_ce = []
+    max_co2 = []
+    max_ch4 = []
+    max_ce = []
+    max_fluo = []
 
 
 
     results = {}
     for index, row in output.iterrows():
+         # Retira valores de CE, CO2, CH4 e fluorescencia do range definidos
+        roi_bin_min = helper_functions.find_nearest(roi_min, row['z_trace'])
+        roi_bin_max = helper_functions.find_nearest(roi_max, row['z_trace'])
+        ce_peak = np.min(row['ce_trace'][roi_bin_min:roi_bin_max])
+        ch4_peak = np.max(row['ch4_mixing_trace'][roi_bin_min:roi_bin_max])
+        co2_peak = np.max(row['co2_mixing_trace'][roi_bin_min:roi_bin_max])
+        fluo_peak = np.max(row['fluo_mixing_trace'][roi_bin_min:roi_bin_max])
+        #ce_m_peak = np.max(row['ce_mixing_trace'][roi_bin_min:roi_bin_max])
         results[index] = {
                 'mratios' : {
                     'CO2/N2': row['co2_mixing_trace'],
@@ -243,12 +258,12 @@ def plot_emissions(output, roi_min, roi_max):
                 'start_time': row['start_time'],
                 'stop_time': row['stop_time'],
                 'duration' : row['duration'],
-                'ce': row['ce'],         
-                'ch4': row['ch4'],
-                'co2': row['co2'],
-                'fluorescence': row['fluo'],
+                'ce': ce_peak,         
+                'ch4': ch4_peak,
+                'co2': co2_peak,
+                'fluorescence': fluo_peak,
                 'z_interval' : row['z_trace'],
-                'flare_pos' : row['z_flare'],
+                #'flare_pos' : row['z_flare'],
                 'files' : row['files'],
             }
         
@@ -263,7 +278,7 @@ def plot_emissions(output, roi_min, roi_max):
 
     z_interval_mean = group_mratios[list(group_mratios.keys())[0]]['z_interval']
     #flare_pos_mean = group_mratios[list(group_mratios.keys())[0]]['flare_pos']
-    flare_pos_mean = output['z_flare'].iloc[0]
+    #flare_pos_mean = output['z_flare'].iloc[0]
 
 
 
@@ -275,11 +290,13 @@ def plot_emissions(output, roi_min, roi_max):
         #mask = (z_interval >= flare_pos - delta) & (z_interval <= flare_pos + delta)
 
         #max_co2.append(np.max(res['mratios']['CO2/N2'][mask]))
-        #max_co2.append(res['co2'])
+        max_co2.append(res['co2'])
         ##max_ch4.append(np.max(res['mratios']['CH4/N2'][mask]))
-        #max_ch4.append(res['ch4'])
+        max_ch4.append(res['ch4'])
         #max_ce.append(np.max(res['mratios']['CE [%]'][mask]))
-        #max_ce.append(res['ce'])
+        max_ce.append(res['ce'])
+
+        max_fluo.append(res['fluorescence'])
 
     # --- Criar painel 2 linhas x 3 colunas ---
     fig, axes = plt.subplots(nrows=2, ncols=4, figsize=(20, 12), layout='constrained')
@@ -313,8 +330,8 @@ def plot_emissions(output, roi_min, roi_max):
         #ax.legend(fontsize=10)
 
     # --- Segunda coluna: valores máximos vs tempo com variabilidade ---
-    #max_values_list = [max_co2, max_ch4, max_ce]
-    values_list = [output['co2'], output['ch4'], output['ce'], output['fluo']]
+    values_list = [max_co2, max_ch4, max_ce, max_fluo]
+    #values_list = [output['co2'], output['ch4'], output['ce'], output['fluo']]
     variables = ['CO2/N2', 'CH4/N2', 'CE [%]', 'FLUO [%]']
     ylabels = ['[ppm]', '[ppm]', '[%]', '[%]']
 
@@ -354,8 +371,10 @@ def plot_emissions(output, roi_min, roi_max):
         #ax.legend(fontsize=10)
 
     # --- Título do painel ---
-    fig.suptitle('Concentration of CO$_2$ and CH$_4$, Combustion Efficiency and Fluorescence\n',
-                fontsize=18, fontweight='bold')
+    if title is None:
+        fig.suptitle('Concentration of CO$_2$ and CH$_4$, Combustion Efficiency and Fluorescence\n', fontsize=18, fontweight='bold')
+    else:
+        fig.suptitle(title, fontsize=18, fontweight='bold')
 
     return(fig)
 #plt.show()
