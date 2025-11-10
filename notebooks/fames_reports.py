@@ -43,7 +43,7 @@ markers = {
 
 
 
-def plot_signals(output):
+def plot_signals(output, roi_min, roi_max):
 
     results = {}
     for index, row in output.iterrows():
@@ -64,7 +64,7 @@ def plot_signals(output):
             }
         
     #interval = timedelta(minutes=5)
-    interval = output['duration'][0]
+    interval = output['duration'].iloc[0]
 
 
 
@@ -138,7 +138,8 @@ def plot_signals(output):
 #            linewidth=1.0
 #        )
 
-        ax_i.axvspan(output['z_min_roi'][0], output['z_max_roi'][0],
+        #ax_i.axvspan(output['z_min_roi'].iloc[0], output['z_max_roi'].iloc[0],
+        ax_i.axvspan(roi_min, roi_max,
         facecolor='lightgray', alpha=1)
 
         ax_i.set_title(legend_labels[key], fontsize=title_fontsize, fontweight='bold')
@@ -218,7 +219,7 @@ tick_minor_size = 12
 from datetime import datetime, timedelta
 import string 
 import matplotlib.dates as mdates
-def plot_emissions(output):
+def plot_emissions(output, roi_min, roi_max):
     plot_groups_concentration = True
     plot_groups = True
 
@@ -252,7 +253,7 @@ def plot_emissions(output):
             }
         
     #interval = timedelta(minutes=5)
-    interval = output['duration'][0]
+    interval = output['duration'].iloc[0]
     group_mratios = results 
 
     mean_mratios = {}
@@ -262,7 +263,7 @@ def plot_emissions(output):
 
     z_interval_mean = group_mratios[list(group_mratios.keys())[0]]['z_interval']
     #flare_pos_mean = group_mratios[list(group_mratios.keys())[0]]['flare_pos']
-    flare_pos_mean = output['z_flare'][0]
+    flare_pos_mean = output['z_flare'].iloc[0]
 
 
 
@@ -294,7 +295,8 @@ def plot_emissions(output):
         ax.plot(z_interval_mean, mean_mratios[key],
                 color=colors_m[key], linestyle='-', linewidth=2, label='Time average')
         
-        ax.axvspan(output['z_min_roi'][0], output['z_max_roi'][0],
+#        ax.axvspan(output['z_min_roi'].iloc[0], output['z_max_roi'].iloc[0],
+        ax.axvspan(roi_min, roi_max,
                 facecolor='lightgray', alpha=1)
         
         ax.set_title(legend_m_labels[key], fontsize=16, fontweight='bold')

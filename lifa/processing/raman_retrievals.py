@@ -199,7 +199,7 @@ def raman_backscatter(signal_raman, signal_emission, dz, reference_idx, alpha_ae
 
 
 def retrieve_raman_backscatter(signal_raman, signal_emission, dz, alpha_aerosol_emission, angstrom_aerosol,elastic_wavelength, raman_wavelength, reference_idx, number_density,alpha_molecular_emmision, alpha_molecular_raman, beta_molecular_emmision, beta_aer_ref=0,reference_window_size=1):
-    """
+    r"""
     Calculates the aerosol backscatter coefficient based on:
     * Preprocessed elastic & raman signals.
     * The retrieved aerosol extinction coefficient.
