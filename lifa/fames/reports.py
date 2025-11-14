@@ -207,14 +207,14 @@ colors_m = {
 ymin_values = {
     'CO2/N2': 0,
     'CH4/N2': 0,
-    'CE [%]': None,
+    'CE [%]': 70,
     'FLUO [%]': 0,
 }
 
 ymax_values = {
     'CO2/N2': None,
     'CH4/N2': None,
-    'CE [%]': None,
+    'CE [%]': 105,
     'FLUO [%]': None,
 }
 
